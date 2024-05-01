@@ -3,6 +3,22 @@
 # shellcheck disable=SC2086
 PATH=${PATH}:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin:/opt/homebrew/bin
 export PATH
+#
+# ——————————————————————————————————————————————————————————————————————————————————
+# __   ___                                    _ _     _
+# \ \ / (_)                             /\   | (_)   | |
+#  \ V / _  __ _  ___  _   _  __ _     /  \  | |_ ___| |_
+#   > < | |/ _` |/ _ \| | | |/ _` |   / /\ \ | | / __| __|
+#  / . \| | (_| | (_) | |_| | (_| |  / ____ \| | \__ \ |_
+# /_/ \_\_|\__,_|\___/ \__, |\__,_| /_/    \_\_|_|___/\__|
+#                       __/ |
+#                      |___/
+#
+# Copyright (c) 2024 DDSRem <https://blog.ddsrem.com>
+#
+# This is free software, licensed under the Mit License.
+#
+# ——————————————————————————————————————————————————————————————————————————————————
 
 Green="\033[32m"
 Red="\033[31m"
@@ -109,7 +125,7 @@ function pull_run_glue() {
 
 function pull_run_glue_xh() {
 
-    BUILDER_NAME="xiaoya_builder_$(date -u +"T%H%M%S%3NZ")"
+    BUILDER_NAME="xiaoya_builder_$(date +%S%N | cut -c 7-11)"
 
     if docker inspect xiaoyaliu/glue:latest > /dev/null 2>&1; then
         local_sha=$(docker inspect --format='{{index .RepoDigests 0}}' xiaoyaliu/glue:latest | cut -f2 -d:)
@@ -284,6 +300,7 @@ function update_media() {
     INFO "${1} 下载完成！"
 
     if docker container inspect "${RESILIO_NAME}" > /dev/null 2>&1; then
+        INFO "Resilio 关闭中..."
         docker stop ${RESILIO_NAME}
     fi
 
@@ -511,8 +528,8 @@ function sync_emby_config() {
 
     USER_COUNT=$(${EMBY_COMMAND} jq '.[].Name' /tmp/emby.response | wc -l)
     for ((i = 0; i < USER_COUNT; i++)); do
-        if [[ "$USER_COUNT" -gt 30 ]]; then
-            WARN "用户超过 30 位，跳过更新用户 Policy！"
+        if [[ "$USER_COUNT" -gt 50 ]]; then
+            WARN "用户超过 50 位，跳过更新用户 Policy！"
             return 1
         fi
         id=$(${EMBY_COMMAND} jq -r ".[$i].Id" /tmp/emby.response)
@@ -703,6 +720,7 @@ EOF
     fi
     # xiaoya image
     detection_xiaoya_image_update
+    sleep 20
     # xiaoya version
     detection_xiaoya_version_update
 
